@@ -1,0 +1,47 @@
+trigger:
+- master
+
+pr:
+- master
+
+steps:
+# Do a shallow fetch as we don't need anything more than the latest commit
+- checkout: self
+  fetchDepth: 1
+
+## Build & test
+# Restore
+- task: DotNetCoreCLI@2
+  displayName: Run 'dotnet restore'
+  inputs:
+    command: restore
+    projects: src/NLog.Extensions.AzureStorage.sln
+
+# Build
+- task: DotNetCoreCLI@2
+  displayName: Run 'dotnet build'
+  inputs:
+    projects: src/NLog.Extensions.AzureStorage.sln
+    arguments: --configuration release -p:Version=$(Build.BuildNumber) -p:Authors=Blue10
+
+# Test
+- task: DotNetCoreCLI@2
+  displayName: Run 'dotnet test'
+  inputs:
+    command: test
+    projects: src/NLog.Extensions.AzureStorage.sln
+    arguments: --configuration release -p:Version=$(Build.BuildNumber) -p:Authors=Blue10
+
+# Pack
+- task: DotNetCoreCLI@2
+  displayName: Run 'dotnet pack'
+  inputs:
+    command: custom
+    custom: pack
+    projects: src/NLog.Extensions.AzureBlobStorage/NLog.Extensions.AzureBlobStorage.csproj
+    arguments: --output $(Build.ArtifactStagingDirectory)/Blue10.NLog.Extensions.AzureBlobStorage --configuration release -p:Version=$(Build.BuildNumber) -p:GenerateDocumentationFile=true -p:Authors=Blue10 -p:DebugSymbols=true -p:DebugType=full -p:IncludeSymbols=true -p:PublishRepositoryUrl=true -p:EmbedUntrackedSources=true -p:SymbolPackageFormat=snupkg
+
+# Upload
+- publish: $(Build.ArtifactStagingDirectory)/Blue10.NLog.Extensions.AzureBlobStorage
+  displayName: 'Publish artifact: Blue10.NLog.Extensions.AzureBlobStorage'
+  artifact: Blue10.NLog.Extensions.AzureBlobStorage

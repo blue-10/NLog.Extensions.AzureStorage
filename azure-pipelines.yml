@@ -5,8 +5,8 @@ pr:
 - master
 
 variables:
-  # This number follows the original repo version on which this code is based upon
-  buildNumber: '3.0.0'
+  # This base version follows the original repo version on which this code is based upon
+  baseVersion: '3.0.0'
   nugetEnvironment: NLogExtensionsAzureStorage NuGet packages
   vstsFeed: 440431cf-ed12-440b-a487-d95f3d4de456
 

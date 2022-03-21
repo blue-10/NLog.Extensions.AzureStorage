@@ -88,6 +88,8 @@ stages:
       artifact: Blue10.NLog.Extensions.AzureBlobStorage
 
 - stage: Push
+  # Skip when we are building from a PR
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   jobs:
   - deployment: Push
     environment: ${{ variables.nugetEnvironment }}

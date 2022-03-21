@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard1.4;net461;net452</TargetFrameworks>
     <DisableImplicitFrameworkReferences Condition=" '$(TargetFramework)' == 'net452' Or '$(TargetFramework)' == 'net461' ">true</DisableImplicitFrameworkReferences>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
     <Version>2.3.0</Version>
 

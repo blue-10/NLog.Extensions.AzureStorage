@@ -5,16 +5,17 @@
 
     <Version>3.0.0</Version>
 
-    <Description>NLog BlobStorageTarget for writing to Azure Cloud Blob Storage</Description>
-    <Authors>jdetmar</Authors>
+    <Description>NLog BlobStorageTarget for writing to Azure Cloud Blob Storage. Modified by Blue10.</Description>
+    <Authors>jdetmar,Blue10</Authors>
     <CurrentYear>$([System.DateTime]::Now.ToString(yyyy))</CurrentYear>
     <Copyright>Copyright (c) $(CurrentYear) - jdetmar</Copyright>
 
-    <PackageTags>NLog;azure;CloudBlob;blob;storage;log;logging</PackageTags>
+	<PackageId>Blue10.NLog.Extensions.AzureBlobStorage</PackageId>
+    <PackageTags>NLog;azure;CloudBlob;blob;storage;log;logging;blue10;b10</PackageTags>
     <PackageIcon>logo64.png</PackageIcon>
-    <PackageProjectUrl>https://github.com/JDetmar/NLog.Extensions.AzureStorage</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/Blue-10/NLog.Extensions.AzureStorage</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/JDetmar/NLog.Extensions.AzureStorage.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/Blue-10/NLog.Extensions.AzureStorage.git</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReleaseNotes>
 Docs: https://github.com/JDetmar/NLog.Extensions.AzureStorage/blob/master/src/NLog.Extensions.AzureBlobStorage/README.md

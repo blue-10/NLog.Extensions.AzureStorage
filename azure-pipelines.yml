@@ -7,7 +7,7 @@ pr:
 variables:
   # This number follows the original repo version on which this code is based upon
   buildNumber: '3.0.0'
-  nugetEnvironment: 'NLog.Extensions.AzureStorage NuGet packages'
+  nugetEnvironment: NLogExtensionsAzureStorage NuGet packages
   vstsFeed: 440431cf-ed12-440b-a487-d95f3d4de456
 
 pool:

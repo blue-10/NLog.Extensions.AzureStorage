@@ -4,44 +4,101 @@ trigger:
 pr:
 - master
 
-steps:
-# Do a shallow fetch as we don't need anything more than the latest commit
-- checkout: self
-  fetchDepth: 1
+variables:
+  # This number follows the original repo version on which this code is based upon
+  buildNumber: '3.0.0'
+  nugetEnvironment: NLog.Extensions.AzureStorage NuGet packages
+  vstsFeed: 440431cf-ed12-440b-a487-d95f3d4de456
 
-## Build & test
-# Restore
-- task: DotNetCoreCLI@2
-  displayName: Run 'dotnet restore'
-  inputs:
-    command: restore
-    projects: src/NLog.Extensions.AzureStorage.sln
+pool:
+  vmImage: windows-2022
 
-# Build
-- task: DotNetCoreCLI@2
-  displayName: Run 'dotnet build'
-  inputs:
-    projects: src/NLog.Extensions.AzureStorage.sln
-    arguments: --configuration release -p:Version=$(Build.BuildNumber) -p:Authors=Blue10
+stages:
+- stage: Versioning
+  jobs:
+  - job: Versioning
+    pool:
+      vmImage: ubuntu-latest
+    
+    variables:
+      # For every version, we increment the build number for every build to get a unique version
+      buildNumber: $[ counter(variables.baseVersion, 0) ]
 
-# Test
-- task: DotNetCoreCLI@2
-  displayName: Run 'dotnet test'
-  inputs:
-    command: test
-    projects: src/NLog.Extensions.AzureStorage.sln
-    arguments: --configuration release -p:Version=$(Build.BuildNumber) -p:Authors=Blue10
+      # Use {baseVersion}.z as version when built on the master branch
+      ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+        finalVersion: ${{ variables.baseVersion }}.$(buildNumber)
+      # Use {baseVersion}.z-branch-name as version when built on a non-master branch
+      ${{ else }}:
+        finalVersion: ${{ variables.baseVersion }}.$(buildNumber)-$(Build.SourceBranchName)
 
-# Pack
-- task: DotNetCoreCLI@2
-  displayName: Run 'dotnet pack'
-  inputs:
-    command: custom
-    custom: pack
-    projects: src/NLog.Extensions.AzureBlobStorage/NLog.Extensions.AzureBlobStorage.csproj
-    arguments: --output $(Build.ArtifactStagingDirectory)/Blue10.NLog.Extensions.AzureBlobStorage --configuration release -p:Version=$(Build.BuildNumber) -p:GenerateDocumentationFile=true -p:Authors=Blue10 -p:DebugSymbols=true -p:DebugType=full -p:IncludeSymbols=true -p:PublishRepositoryUrl=true -p:EmbedUntrackedSources=true -p:SymbolPackageFormat=snupkg
+    steps:
+      # No need to checkout the source for this step
+      - checkout: none
+      - script: |
+          echo "##vso[build.updatebuildnumber]$(finalVersion)"
+          echo "##vso[task.setvariable variable=version;isOutput=true]$(finalVersion)"
+        displayName: Set build version
 
-# Upload
-- publish: $(Build.ArtifactStagingDirectory)/Blue10.NLog.Extensions.AzureBlobStorage
-  displayName: 'Publish artifact: Blue10.NLog.Extensions.AzureBlobStorage'
-  artifact: Blue10.NLog.Extensions.AzureBlobStorage
+- stage: Build
+  jobs:
+  - job: Build
+    variables:
+      buildArguments: --configuration release -p:Version=$(Build.BuildNumber) -p:Authors=Blue10
+
+    steps:
+    # Do a shallow fetch as we don't need anything more than the latest commit
+    - checkout: self
+      fetchDepth: 1
+
+    ## Build & test
+    # Restore
+    - task: DotNetCoreCLI@2
+      displayName: Run 'dotnet restore'
+      inputs:
+        command: restore
+        projects: src/NLog.Extensions.AzureStorage.sln
+
+    # Build
+    - task: DotNetCoreCLI@2
+      displayName: Run 'dotnet build'
+      inputs:
+        projects: src/NLog.Extensions.AzureStorage.sln
+        arguments: ${{ variables.buildArguments }}
+
+    # Test
+    - task: DotNetCoreCLI@2
+      displayName: Run 'dotnet test'
+      inputs:
+        command: test
+        projects: src/NLog.Extensions.AzureStorage.sln
+        arguments: ${{ variables.buildArguments }}
+
+    # Pack
+    - task: DotNetCoreCLI@2
+      displayName: Run 'dotnet pack'
+      inputs:
+        command: custom
+        custom: pack
+        projects: src/NLog.Extensions.AzureBlobStorage/NLog.Extensions.AzureBlobStorage.csproj
+        arguments: --output $(Build.ArtifactStagingDirectory)/Blue10.NLog.Extensions.AzureBlobStorage ${{ variables.buildArguments }} -p:GenerateDocumentationFile=true -p:DebugSymbols=true -p:DebugType=full -p:IncludeSymbols=true -p:PublishRepositoryUrl=true -p:EmbedUntrackedSources=true -p:SymbolPackageFormat=snupkg
+
+    # Upload
+    - publish: $(Build.ArtifactStagingDirectory)/Blue10.NLog.Extensions.AzureBlobStorage
+      displayName: 'Publish artifact: Blue10.NLog.Extensions.AzureBlobStorage'
+      artifact: Blue10.NLog.Extensions.AzureBlobStorage
+
+- stage: Push
+  jobs:
+  - deployment: Push
+    environment: ${{ variables.nugetEnvironment }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          # Push
+          - task: DotNetCoreCLI@2
+            displayName: Run 'dotnet push'
+            inputs:
+              command: push
+              packagesToPush: $(Pipeline.Workspace)/**/*.nupkg
+              publishVstsFeed: ${{ variables.vstsFeed }}

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29905.134
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EACADB54-1A72-4CEE-AF3A-5AEDC3CB553A}"
 	ProjectSection(SolutionItems) = preProject
@@ -14,8 +14,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{246DBA78-87B8-4982-912F-4BBFFF005AD6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NLog.Extensions.AzureEventHub.Tests", "..\test\NLog.Extensions.AzureEventHub.Tests\NLog.Extensions.AzureEventHub.Tests.csproj", "{EEAF8AEA-27AE-464A-9EAB-EE373FEF3EE2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLog.Extensions.AzureStorage.IntegrationTest", "..\test\NLog.Extensions.AzureStorage.IntegrationTest\NLog.Extensions.AzureStorage.IntegrationTest.csproj", "{BD4E0EB2-99DB-41CB-A46B-DC573A7573CA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NLog.Extensions.AzureBlobStorage", "NLog.Extensions.AzureBlobStorage\NLog.Extensions.AzureBlobStorage.csproj", "{21B2270D-1F45-4BE0-8CCE-DEC8FF293704}"
 EndProject
@@ -51,10 +49,6 @@ Global
 		{EEAF8AEA-27AE-464A-9EAB-EE373FEF3EE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EEAF8AEA-27AE-464A-9EAB-EE373FEF3EE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EEAF8AEA-27AE-464A-9EAB-EE373FEF3EE2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BD4E0EB2-99DB-41CB-A46B-DC573A7573CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BD4E0EB2-99DB-41CB-A46B-DC573A7573CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BD4E0EB2-99DB-41CB-A46B-DC573A7573CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD4E0EB2-99DB-41CB-A46B-DC573A7573CA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{21B2270D-1F45-4BE0-8CCE-DEC8FF293704}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{21B2270D-1F45-4BE0-8CCE-DEC8FF293704}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21B2270D-1F45-4BE0-8CCE-DEC8FF293704}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -101,7 +95,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{EEAF8AEA-27AE-464A-9EAB-EE373FEF3EE2} = {246DBA78-87B8-4982-912F-4BBFFF005AD6}
-		{BD4E0EB2-99DB-41CB-A46B-DC573A7573CA} = {246DBA78-87B8-4982-912F-4BBFFF005AD6}
 		{18DBD852-28D9-43C8-9A1A-F13C13B5CA13} = {246DBA78-87B8-4982-912F-4BBFFF005AD6}
 		{A56BD3E3-C388-41B9-A021-8B67C43CF225} = {246DBA78-87B8-4982-912F-4BBFFF005AD6}
 		{8609512C-29FD-4984-A318-BFA5A681F0A1} = {246DBA78-87B8-4982-912F-4BBFFF005AD6}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Specialized;
 using NLog.Common;
@@ -38,11 +39,6 @@ namespace NLog.Targets
         /// Alternative to ConnectionString
         /// </summary>
         public Layout TenantIdentity { get; set; }
-
-        /// <summary>
-        /// Alternative to ConnectionString (Defaults to https://storage.azure.com when not set)
-        /// </summary>
-        public Layout ResourceIdentity { get; set; }
 
         [RequiredParameter]
         public Layout Container { get; set; }
@@ -88,7 +84,6 @@ namespace NLog.Targets
             string connectionString = string.Empty;
             string serviceUri = string.Empty;
             string tenantIdentity = string.Empty;
-            string resourceIdentity = string.Empty;
 
             Dictionary<string, string> blobMetadata = null;
             Dictionary<string, string> blobTags = null;
@@ -102,7 +97,6 @@ namespace NLog.Targets
                 {
                     serviceUri = ServiceUri?.Render(defaultLogEvent);
                     tenantIdentity = TenantIdentity?.Render(defaultLogEvent);
-                    resourceIdentity = ResourceIdentity?.Render(defaultLogEvent);
                 }
 
                 if (BlobMetadata?.Count > 0)
@@ -134,7 +128,7 @@ namespace NLog.Targets
                     }
                 }
 
-                _cloudBlobService.Connect(connectionString, serviceUri, tenantIdentity, resourceIdentity, blobMetadata, blobTags);
+                _cloudBlobService.Connect(connectionString, serviceUri, tenantIdentity, blobMetadata, blobTags);
                 InternalLogger.Trace("AzureBlobStorageTarget - Initialized");
             }
             catch (Exception ex)
@@ -341,51 +335,21 @@ namespace NLog.Targets
             private AppendBlobClient _appendBlob;
             private BlobContainerClient _container;
 
-            private class AzureServiceTokenProviderCredentials : Azure.Core.TokenCredential
-            {
-                private readonly string _resourceIdentity;
-                private readonly string _tenantIdentity;
-                private readonly Microsoft.Azure.Services.AppAuthentication.AzureServiceTokenProvider _tokenProvider;
-
-                public AzureServiceTokenProviderCredentials(string tenantIdentity, string resourceIdentity)
-                {
-                    if (string.IsNullOrWhiteSpace(_resourceIdentity))
-                        _resourceIdentity = "https://storage.azure.com/";
-                    else
-                        _resourceIdentity = resourceIdentity;
-                    if (!string.IsNullOrWhiteSpace(tenantIdentity))
-                        _tenantIdentity = tenantIdentity;
-                    _tokenProvider = new Microsoft.Azure.Services.AppAuthentication.AzureServiceTokenProvider();
-                }
-
-                public override async ValueTask<Azure.Core.AccessToken> GetTokenAsync(Azure.Core.TokenRequestContext requestContext, CancellationToken cancellationToken)
-                {
-                    try
-                    {
-                        var result = await _tokenProvider.GetAuthenticationResultAsync(_resourceIdentity, _tenantIdentity, cancellationToken: cancellationToken).ConfigureAwait(false);
-                        return new Azure.Core.AccessToken(result.AccessToken, result.ExpiresOn);
-                    }
-                    catch (Exception ex)
-                    {
-                        InternalLogger.Error(ex, "AzureBlobStorageTarget - Failed getting AccessToken from AzureServiceTokenProvider for resource {0}", _resourceIdentity);
-                        throw;
-                    }
-                }
-
-                public override Azure.Core.AccessToken GetToken(Azure.Core.TokenRequestContext requestContext, CancellationToken cancellationToken)
-                {
-                    return GetTokenAsync(requestContext, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
-                }
-            }
-
-            public void Connect(string connectionString, string serviceUri, string tenantIdentity, string resourceIdentity, IDictionary<string, string> blobMetadata, IDictionary<string, string> blobTags)
+            public void Connect(string connectionString, string serviceUri, string tenantIdentity, IDictionary<string, string> blobMetadata, IDictionary<string, string> blobTags)
             {
                 _blobMetadata = blobMetadata?.Count > 0 ? blobMetadata : null;
                 _blobTags = blobTags?.Count > 0 ? blobTags : null;
 
                 if (string.IsNullOrEmpty(connectionString) && !string.IsNullOrEmpty(serviceUri))
                 {
-                    var tokenCredential = new AzureServiceTokenProviderCredentials(tenantIdentity, resourceIdentity);
+                    var tokenCredentialOptions = new DefaultAzureCredentialOptions();
+                    if (!string.IsNullOrEmpty(tenantIdentity))
+                    {
+                        tokenCredentialOptions.SharedTokenCacheTenantId = tenantIdentity;
+                        tokenCredentialOptions.VisualStudioCodeTenantId = tenantIdentity;
+                        tokenCredentialOptions.VisualStudioTenantId = tenantIdentity;
+                    }
+                    var tokenCredential = new DefaultAzureCredential(tokenCredentialOptions);
                     _client = new BlobServiceClient(new Uri(serviceUri), tokenCredential);
                 }
                 else
